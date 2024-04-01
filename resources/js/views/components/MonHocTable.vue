@@ -5,11 +5,6 @@
         <div class="col-8">
           <h6>Danh sách môn học</h6>
         </div>
-        <div class="col-2">
-          <select name="lophoc" id="" class="form-select" v-model="form.malop" @change="changeEventsSource">
-            <option v-for="lophoc in listLopHoc" :value="lophoc.id">{{ lophoc.id }}</option>
-          </select>
-        </div>
         <div class="col-2 ms-2"><argon-button color="success" size="sm" class="ms-auto" data-bs-toggle="modal"
             data-bs-target="#exampleModal">Thêm môn học</argon-button>
         </div>
@@ -22,8 +17,9 @@
           <thead>
             <tr>
               <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tên môn học</th>
-              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Số tiết</th>
-              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Còn lạỉ</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Số tiết LT</th>
+              <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Số tiết TH</th>
+              <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Lớp</th>
               <th class="text-secondary opacity-7"></th>
             </tr>
           </thead>
@@ -33,22 +29,26 @@
                 <div class="d-flex px-2 py-1">
 
                   <div class="d-flex flex-column justify-content-center">
-                    <h6 class="mb-0 text-sm">{{ monhoc.tenmh }}</h6>
-                    <p class="text-xs text-secondary mb-0">{{ monhoc.name }}</p>
+                    <h6 class="mb-0 text-sm">{{ monhoc.TenMH }}</h6>
+
                   </div>
                 </div>
               </td>
               <td>
-                <p class="text-xs font-weight-bold mb-0">{{ monhoc.sotiet }}</p>
+                <p class="text-xs font-weight-bold mb-0">{{ monhoc.LT }}</p>
               </td>
               <td class="align-middle text-center">
-                <p class="text-xs font-weight-bold mb-0">{{ monhoc.conlai }}</p>
+                <p class="text-xs font-weight-bold mb-0">{{ monhoc.TH }}</p>
+              </td>
+              <td class="align-middle text-center">
+                <p class="text-xs font-weight-bold mb-0">{{ monhoc.Lop }}</p>
               </td>
               <td class="align-middle">
                 <span class="m-3"> <a href="javascript:;" class="text-secondary font-weight-bold text-xs"
                     data-toggle="tooltip" data-original-title="Edit class">Chỉnh sửa</a></span>
                 <span class="m-3 "> <a href="javascript:;" class="text-secondary font-weight-bold text-xs"
-                    data-toggle="tooltip" data-original-title="Delete class" @click="btnDelete(monhoc.id)">Xóa</a></span>
+                    data-toggle="tooltip" data-original-title="Delete class"
+                    @click="btnDelete(monhoc.id)">Xóa</a></span>
               </td>
             </tr>
           </tbody>
@@ -67,19 +67,30 @@
         <div class="modal-body">
           <div class="">
             <label for="example-text-input" class="form-control-label">Tên môn học</label>
-            <input class="form-control" type="text" name="id" v-model="this.form.tenmh" />
+            <input class="form-control" type="text" name="id" v-model="this.form.TenMH" />
           </div>
 
           <div class="">
-            <label for="example-text-input" class="form-control-label">Số tiết</label>
-            <input class="form-control" type="number" min="0" name="siso" v-model="this.form.sotiet" />
+            <label for="example-text-input" class="form-control-label">Số tiết LT</label>
+            <input class="form-control" type="number" min="0" name="siso" v-model="this.form.LT" />
           </div>
           <div class="">
-            <label for="example-text-input" class="form-control-label">Giảng viên</label>
-            <select name="lophoc" id="" class="form-select" v-model="form.idgv" @change="changeEventsSource">
-              <option v-for="giangvien in listGiangVien" :value="giangvien.id">{{ giangvien.id }} - {{ giangvien.name }}</option>
-            </select>
+            <label for="example-text-input" class="form-control-label">Số tiết TH</label>
+            <input class="form-control" type="number" min="0" name="siso" v-model="this.form.TH" />
           </div>
+          <div class="">
+            <label for="example-text-input" class="form-control-label">Ngày Thi</label>
+            <input class="form-control" type="date" min="0" name="siso" v-model="this.form.NgayThi" />
+          </div>
+          <div class="">
+            <label for="example-text-input" class="form-control-label">Ngày Thanh Toán</label>
+            <input class="form-control" type="date" min="0" name="siso" v-model="this.form.NgayThanhToan" />
+          </div>
+          <div class="">
+            <label for="example-text-input" class="form-control-label">Lớp</label>
+            <input class="form-control" type="text" min="0" name="siso" v-model="this.form.Lop" />
+          </div>
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -104,55 +115,50 @@ export default {
   data() {
     return {
       listMonHoc: {},
-      listLopHoc: {},
-      listGiangVien: {},
+
       form: {
-        tenmh: '',
-        sotiet: 0,
-        malop: '',
-        idgv: null
+        TenMH: '',
+        LT: 0,
+        TH: '',
+        Lop: null,
+        NgayThi: null,
+        NgayThanhToan: null,
+        Lop:''
       },
     }
   },
   methods: {
     async getMonHoc() {
       let _THIS = this;
-      await axios.get(this.API_URL + '/monhoc/' + this.form.malop)
+      await axios.get(this.API_URL + '/monhoc')
         .then(function (response) {
+
           _THIS.listMonHoc = response.data
         })
         .catch(function (err) {
           toast.error("Đã xảy ra lỗi", { theme: 'colored' })
         });
     },
-    async getGiangVien() {
-      let _THIS = this;
-      await axios.get(this.API_URL + '/user')
-        .then(function (response) {
-          _THIS.listGiangVien = response.data
-        })
-        .catch(function (err) {
-          toast.error("Đã xảy ra lỗi khi lấy danh sách Giảng viên", { theme: 'colored' })
-        });
-    },
+
     async postMonHoc() {
       let _THIS = this;
       await axios.post(this.API_URL + '/monhoc', this.form)
         .then(function () {
-          toast.success("Thêm lớp học thành công", { theme: 'colored' }),
-            _THIS.form.tenmh = '',
-            _THIS.form.sotiet = 0,
-            _THIS.form.giangvien = '',
+          toast.success("Thêm môn học thành công", { theme: 'colored' }),
+            _THIS.form.TenMH = '',
+            _THIS.form.LT = 1,
+            _THIS.form.TH = 1,
+            _THIS.form.NgayThi = null,
+            _THIS.form.NgayThanhToan = null,
             _THIS.getMonHoc();
         })
         .catch(function (err) {
-          console.log(err)
           toast.error("Đã xảy ra lỗi", { theme: 'colored' })
         });
     },
 
     async deleteMonHoc(id) {
-      await axios.delete(this.API_URL + '/monhoc/' + id, { data: { id: id } })
+      await axios.delete(this.API_URL + '/monhoc/' + id, )
         .then(function () {
           toast.success("Xóa môn học thành công", { theme: 'colored' })
         })
@@ -178,25 +184,10 @@ export default {
         }
       });
     },
-    async getLopHoc() {
-      let _THIS = this
-      await axios.get(this.API_URL + '/lophoc')
-        .then(function (response) {
-          _THIS.listLopHoc = response.data
-        })
-        .catch(function (err) {
-          if (err.data != null)
-            toast.error("Không thể lấy danh sách lớp học", { theme: 'colored' })
-        });
-    },
-    async changeEventsSource() {
-      await this.getMonHoc()
 
-    },
   },
   mounted() {
-    this.getLopHoc();
-    this.getGiangVien();
+    this.getMonHoc();
   },
 };
 </script>
